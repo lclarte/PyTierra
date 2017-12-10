@@ -5,7 +5,9 @@ from CPU import *
 class Main:
 
 	def test(self):
-		self.U.liste_cpus[0].afficher_etat()
+		for i in range(len(self.U.liste_cpus)):
+			print("Pointeur du CPU numero ", i, '=', self.U.liste_cpus[i].ptr)
+			print("Valeur de ax du NPU numero", i, '=', self.U.liste_cpus[i].ax)
 		print(' ')
 		print(' NB DE CPU :', len(self.U.liste_cpus))
 
@@ -13,13 +15,10 @@ class Main:
 		i = 0
 		self.U = Univers.Univers()
 		self.U.inserer_cpu(0) #initialiste un CPU au debut de l'univers
-		for i in range(800):
-			self.U.executer_cpus()
-
-		while True:
+		while True:	
 			os.system('clear')
-			self.test()
 			self.U.executer_cpus()
+			self.test()
 			s = raw_input()
 			if s == "q":
 				break

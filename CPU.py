@@ -35,9 +35,9 @@ class CPU:
 		self.stack_ptr = (self.stack_ptr - 1) % (TAILLE_STACK)
 
 	def pop_stack(self):
-		"Retourne la valeur du stack actuellement pointee SANS DECREMENTER\
+		"Retourne la valeur du stack qui est au dessus i.e en stack_ptr - 1 SANS DECREMENTER\
 		le stack pointeur"
-		return self.stack[self.stack_ptr]
+		return self.stack[(self.stack_ptr-1)%TAILLE_STACK]
 
 	def push_stack(self, x):
 		"Met la valeur de l'argument dans la stack SANS INCREMENTER le stack\
