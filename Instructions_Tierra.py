@@ -26,7 +26,7 @@ def shl(cpu):
 
 def zero(c):
 	c.cx = 0
-	c.incrementer_ptr() #cf doc tierra p 278
+	#c.incrementer_ptr() #cf doc tierra p 278
 
 def ifz(c):
 	#Si cx vaut 0, on ne fait rien car le CPU va ensuite de lui 
@@ -97,48 +97,44 @@ def popD(c):
 	c.decrementer_stack_ptr()
 
 def jmp(c):
-	l_pattern, indice_avant, i_avant = trouver_template_complementaire_avant(c, LIMITE_RECHERCHE)
-	l_pattern_arriere, indice_arriere, i_arriere = trouver_template_complementaire_arriere(c, LIMITE_RECHERCHE)
-	if indice_arriere == indice_avant == -1:
-		raise Exception("Pattern non trouve")
+	try:
+		l_pattern, indice, i = trouver_template_complementaire(c, LIMITE_RECHERCHE)
+	except PatternNotFoundException as e:
+		c.ptr += e.l_pattern
+	except NoPatternException:
 		return
 	else:
-		if i_avant < i_arriere or indice_arriere == -1:
-			c.ptr = indice_avant
-		else:
-			c.ptr = indice_arriere
-			print(l_pattern, indice_arriere, i_arriere)
-	c.ptr -= 1#Car apres l'execution, on fait faire c.ptr += 1
-	#donc on compense pour pas  sauter le premier nop du pattern trouve
+		c.ptr = indice + l_pattern- 1 #on soustrait 1 car le ptr va ensuite etre incremente
+
 
 def jmpb(c):
-	l_pattern, indice_arriere, i_arriere = trouver_template_complementaire_arriere(c, LIMITE_RECHERCHE)
-	if indice_arriere == -1:
-		raise Exception("Pattern non trouve")
-	else:
-		c.ptr = indice_arriere
-	c.ptr -= 1
-
-def call(c):
-	l_pattern, indice_avant, i_avant = trouver_template_complementaire_avant(c, LIMITE_RECHERCHE)
-	l_pattern_arriere, indice_arriere, i_arriere = trouver_template_complementaire_arriere(c, LIMITE_RECHERCHE)
-	if l_pattern == 0:
-		c.push_stack(c.ptr +1)
-	if indice_arriere == indice_avant == -1:
-		c.ptr = c.ptr + l_pattern + 1
-		raise Exception("Pattern non trouve")
+	try:
+		l_pattern, indice, i = trouver_template_complementaire_arriere(c, LIMITE_RECHERCHE)
+	except PatternNotFoundException as e:
+		c.ptr += e.l_pattern
+	except NoPatternException:
 		return
 	else:
-		if i_avant < i_arriere or indice_arriere == -1:
-			c.ptr = indice_avant
-			c.push_stack(indice_avant)
-		else:
-			c.ptr = indice_arriere
-			c.push_stack(indice_avant)
+		c.ptr = indice + l_pattern - 1 #on soustrait 1 car le ptr va ensuite etre incremente
+
+def call(c):
+	try:
+		l_pattern, indice, i = trouver_template_complementaire(c, LIMITE_RECHERCHE)
+	except NoPatternException:
+		c.push_stack(c.ptr+1)
+		c.incrementer_stack_ptr()#cf doc tierra sur le comportement de la fonction (j'ai un doute)
+	except PatternNotFoundException as e:
+		c.ptr += e.l_pattern
+	else:
+		c.push_stack(c.ptr + l_pattern + 1)
+		c.incrementer_stack_ptr() #on stocke l'ANCIENNE adresse + l_pattern
+		c.ptr += indice +l_pattern - 1 #car on va a l'adresse apres le pattern
+
+
 def ret(c):
 	x = c.pop_stack()
 	c.decrementer_stack_ptr()
-	c.ptr = x
+	c.ptr = x - 1 #car on va incrementer ensuite c.ptr
 
 def movDC(c):
 	c.dx = c.cx
@@ -146,15 +142,28 @@ def movDC(c):
 def movBA(c):
 	c.bx = c.ax
 
-def adr(c):
-	pass
+def movii(c):
+	#sert a copier le contenu d'une case dans une autree
+	u = c.univers
+	u.memoire[c.bx] = u.memoire[c.ax]
+
+def adr(c, fonc=trouver_template_complementaire):
+	try:
+		l_pattern, indice, i = trouver_template_complementaire(c, LIMITE_RECHERCHE)
+	except NoPatternException:
+		pass
+	except PatternNotFoundException as e:
+		pass
+	else:
+		c.ax = indice + l_pattern #car on stocke l'adresse suivant le pattern
+
 
 def adrb(c):
-	pass
+	adr(c, trouver_template_complementaire_arriere)
 
 def adrf(c):
-	pass
-
+	adr(c, trouver_template_complementaire_avant)
+	
 #													NOUVELLES INSTRUCTIONS
 def new(c):
 	"Creer un nouveau cpu a l'endroit de ax"

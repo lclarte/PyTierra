@@ -1,4 +1,6 @@
 from Univers import *
+from Exceptions import *
+
 import math 
 
 def knuth_morris_pratt(s, t):
@@ -38,6 +40,8 @@ def calculer_pattern(memoire, ptr_tmp):
 	return pattern
 
 def trouver_template_complementaire_avant(c, LIMITE_RECHERCHE):
+	"Fait la meme chose que trouver_template_complementaire_avant_mem mais prend en argument\
+	non pas la memoire + pointeur d'instructon, mais seulement le Processeur"
 	return trouver_template_complementaire_avant_mem(c.univers.memoire, c.ptr, LIMITE_RECHERCHE)
 
 def trouver_template_complementaire_avant_mem(memoire, ptr, LIMITE_RECHERCHE):
@@ -48,14 +52,16 @@ def trouver_template_complementaire_avant_mem(memoire, ptr, LIMITE_RECHERCHE):
 	#c est le CPU
 	pattern = calculer_pattern(memoire, ptr + 1)
 	longueur_pattern = len(pattern)
+	
 	if longueur_pattern == 0:
-		return (0, ptr + 1, 0)
+		raise NoPatternException()
+
 	copie_avant = memoire[ptr+longueur_pattern+1:] + memoire[:ptr]
 	i 			= knuth_morris_pratt(copie_avant, pattern)
 	
 	#dans le cas ou on a rien trouve
 	if i < 0:
-		return (longueur_pattern, -1, float('inf'))
+		raise PatternNotFoundException(l_pattern)
 
 	indice_reel = 0
 	if i >= (len(memoire)-(ptr+longueur_pattern+1)):
@@ -73,8 +79,9 @@ def trouver_template_complementaire_arriere_mem(memoire, ptr, LIMITE_RECHERCHE):
 	pattern = calculer_pattern(memoire, ptr + 1)
 	pattern_arriere = pattern[::-1]
 	longueur_pattern = len(pattern)
+
 	if longueur_pattern == 0:
-		return (0, ptr + 1, 0)
+		raise NoPatternException()
 
 	copie_avant = memoire[ptr+longueur_pattern+1:] + memoire[:ptr]
 	copie_arriere = copie_avant[::-1]
@@ -82,8 +89,8 @@ def trouver_template_complementaire_arriere_mem(memoire, ptr, LIMITE_RECHERCHE):
 	
 	#dans le cas ou on a rien trouve
 	if i < 0:
-		return (longueur_pattern, -1, float('inf'))
-	
+		raise PatternNotFoundException(longueur_pattern)
+
 	indice_reel = 0
 	#Le i est l'indice en sachant qu'on a commence a compter a partir de c.ptr - 1 
 	if i >= ptr:
@@ -92,3 +99,24 @@ def trouver_template_complementaire_arriere_mem(memoire, ptr, LIMITE_RECHERCHE):
 		indice_reel =(ptr - i - longueur_pattern)%len(memoire)
 	#Pour l'instant, on s'en fout de LIMITE RECHERCHE
 	return (longueur_pattern, indice_reel, i)
+
+def trouver_template_complementaire(c, LIMITE_RECHERCHE):
+	try:
+		l_pattern, indice_avant, i_avant = trouver_template_complementaire_avant(c, LIMITE_RECHERCHE)
+	except PatternNotFoundException as e:
+		l_pattern = e.l_pattern
+		indice_avant = float('inf')
+	except NoPatternException:
+		raise NoPatternException()
+	try:
+		l_pattern_arriere, indice_arriere, i_arriere = trouver_template_complementaire_avant(c, LIMITE_RECHERCHE)
+	except PatternNotFoundException as e:
+		indice_arriere = float('inf')
+	if indice_arriere == indice_avant == float('inf'):
+		#dans ce cas, on a trouve le pattern nul part	
+		raise PatternNotFoundException(l_pattern)
+	else:
+		if i_arriere < i_avant:
+			return l_pattern, indice_arriere, i_arriere
+		else:
+			return l_pattern, indice_avant, i_avant

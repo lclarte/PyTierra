@@ -1,13 +1,14 @@
 from CPU import *
 
-TAILLE_MEMOIRE = 100
+TAILLE_MEMOIRE = 500
 
 class Univers:
 	"Contient les CPU et le monde i.e les instructions a executer"
 	cpu_actuel 	   = 0
 
 	def __init__(s):
-		s.memoire 		= ["nop0", "nop1", "incA", "incB", "jmp", "nop1", "nop0"] + [None]*(TAILLE_MEMOIRE)
+		#code temporaire
+		s.memoire 	= ancetre + [None]*(TAILLE_MEMOIRE-len(ancetre))
 		s.liste_cpus 	= []
 
 	def executer_cpus(s):
