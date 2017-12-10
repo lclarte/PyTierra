@@ -20,6 +20,7 @@ class CPU:
 			f = eval(self.univers.memoire[self.ptr])
 			f(self)
 		except Exception as e:
+			print("Instruction ayant echoue : ", self.univers.memoire[self.ptr])
 			print(e)
 		finally:
 			self.incrementer_ptr()
@@ -31,7 +32,7 @@ class CPU:
 		self.stack_ptr = (self.stack_ptr + 1) % (TAILLE_STACK)
 
 	def decrementer_stack_ptr(self):
-		self.stack_ptr = (self.stack_ptr + 1) % (TAILLE_STACK)
+		self.stack_ptr = (self.stack_ptr - 1) % (TAILLE_STACK)
 
 	def pop_stack(self):
 		"Retourne la valeur du stack actuellement pointee SANS DECREMENTER\
@@ -52,3 +53,5 @@ class CPU:
 		print(self.ax, self.bx, self.cx, self.dx)
 		print("Etat du pointeur d'instructions")
 		print(self.ptr, " sur ", self.univers.memoire[self.ptr])
+		print('valeur de la stack : ', self.stack)
+		print('pointeur de la stack : ', self.stack_ptr)

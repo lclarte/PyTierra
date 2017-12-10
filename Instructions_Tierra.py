@@ -21,12 +21,11 @@ def not0(cpu):
 	else:
 		cpu.cx -= 1
 
-def shl(cpu):
-	cpu.cx << 1
+def shl(c):
+	c.cx = (c.cx << 1)
 
 def zero(c):
 	c.cx = 0
-	#c.incrementer_ptr() #cf doc tierra p 278
 
 def ifz(c):
 	#Si cx vaut 0, on ne fait rien car le CPU va ensuite de lui 
@@ -38,7 +37,7 @@ def subCAB(c):
 	c.cx = c.ax - c.bx
 
 def subAAC(c):
-	c.ax = c.ac - c.cx
+	c.ax = c.ax - c.cx
 
 def incA(c):
 	c.ax += 1
@@ -101,7 +100,9 @@ def jmp(c):
 		l_pattern, indice, i = trouver_template_complementaire(c, LIMITE_RECHERCHE)
 	except PatternNotFoundException as e:
 		c.ptr += e.l_pattern
+		print("ERREUR TAMER") #a enleve
 	except NoPatternException:
+		print("ERREUR TAMER")
 		return
 	else:
 		c.ptr = indice + l_pattern- 1 #on soustrait 1 car le ptr va ensuite etre incremente
@@ -115,6 +116,7 @@ def jmpb(c):
 	except NoPatternException:
 		return
 	else:
+		print('truc')
 		c.ptr = indice + l_pattern - 1 #on soustrait 1 car le ptr va ensuite etre incremente
 
 def call(c):
@@ -127,13 +129,13 @@ def call(c):
 		c.ptr += e.l_pattern
 	else:
 		c.push_stack(c.ptr + l_pattern + 1)
-		c.incrementer_stack_ptr() #on stocke l'ANCIENNE adresse + l_pattern
-		c.ptr += indice +l_pattern - 1 #car on va a l'adresse apres le pattern
+		#c.incrementer_stack_ptr() #on stocke l'ANCIENNE adresse + l_pattern
+		c.ptr = indice + l_pattern - 1 #car on va a l'adresse apres le pattern
 
 
 def ret(c):
 	x = c.pop_stack()
-	c.decrementer_stack_ptr()
+	#c.decrementer_stack_ptr()
 	c.ptr = x - 1 #car on va incrementer ensuite c.ptr
 
 def movDC(c):
@@ -145,7 +147,7 @@ def movBA(c):
 def movii(c):
 	#sert a copier le contenu d'une case dans une autree
 	u = c.univers
-	u.memoire[c.bx] = u.memoire[c.ax]
+	u.memoire[c.ax] = u.memoire[c.bx]
 
 def adr(c, fonc=trouver_template_complementaire):
 	try:

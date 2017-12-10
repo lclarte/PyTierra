@@ -31,7 +31,7 @@ nop0
 nop0
 nop1
 nop1
-divide
+new
 jmp
 nop0
 nop0

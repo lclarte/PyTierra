@@ -1,4 +1,5 @@
 from CPU import *
+from Enregistrement import *
 
 TAILLE_MEMOIRE = 500
 
@@ -8,7 +9,8 @@ class Univers:
 
 	def __init__(s):
 		#code temporaire
-		s.memoire 	= ancetre + [None]*(TAILLE_MEMOIRE-len(ancetre))
+		ancetre = charger_genome('ancestor')
+		s.memoire = ancetre + [None]*(TAILLE_MEMOIRE-len(ancetre))
 		s.liste_cpus 	= []
 
 	def executer_cpus(s):
